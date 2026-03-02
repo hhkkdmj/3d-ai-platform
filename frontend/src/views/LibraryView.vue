@@ -50,11 +50,7 @@
         </el-radio-button>
       </el-radio-group>
 
-      <div class="batch-actions" v-if="selectedProjects.length > 0">
-        <el-button type="danger" @click="handleBatchDelete">
-          <el-icon><Delete /></el-icon>批量删除 ({{ selectedProjects.length }})
-        </el-button>
-      </div>
+
     </div>
 
     <!-- 项目列表 -->
@@ -77,7 +73,6 @@
       <!-- 项目网格 -->
       <div v-else class="projects-grid">
         <div class="project-item" v-for="project in projectStore.projects" :key="project.id">
-          <el-checkbox v-model="selectedProjects" :label="project.id" class="project-checkbox" />
           <ProjectCard
             :project="project"
             :is-public="false"
@@ -132,8 +127,7 @@ const sortOrder = ref<'asc' | 'desc'>('desc')
 const currentPage = ref(1)
 const pageSize = ref(12)
 
-// 批量操作状态
-const selectedProjects = ref<number[]>([])
+
 
 // 表单状态
 const formVisible = ref(false)
@@ -203,18 +197,7 @@ const handleSizeChange = (size: number) => {
   loadProjects()
 }
 
-const handleBatchDelete = async () => {
-  if (selectedProjects.value.length === 0) return
 
-  try {
-    await projectStore.bulkDeleteProjects(selectedProjects.value)
-    ElMessage.success(`成功删除 ${selectedProjects.value.length} 个项目`)
-    selectedProjects.value = []
-    loadProjects()
-  } catch (error) {
-    ElMessage.error('批量删除项目失败')
-  }
-}
 
 const goHome = () => {
   router.push('/')

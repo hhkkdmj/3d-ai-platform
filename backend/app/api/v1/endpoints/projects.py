@@ -255,32 +255,7 @@ async def get_favorite_projects(
     )
 
 
-@router.delete("/bulk")
-async def bulk_delete_projects(
-    project_ids: List[int] = Query(..., description="项目ID列表"),
-    current_user: User = Depends(get_current_user),
-    db: Session = Depends(get_db)
-):
-    """批量删除项目"""
-    # 验证项目所有权
-    projects = db.query(Project).filter(
-        Project.id.in_(project_ids),
-        Project.user_id == current_user.id
-    ).all()
-    
-    if len(projects) != len(project_ids):
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="部分项目不存在或无权删除"
-        )
-    
-    # 删除项目
-    for project in projects:
-        db.delete(project)
-    
-    db.commit()
-    
-    return {"message": f"成功删除 {len(projects)} 个项目"}
+
 
 
 @router.get("/{project_id}", response_model=ProjectResponse)

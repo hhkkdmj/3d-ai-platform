@@ -165,6 +165,7 @@ export const useGalleryStore = defineStore('gallery', () => {
 
   const fetchFavoriteProjects = async (params?: ProjectFilterParams) => {
     loading.value = true
+    projects.value = []
     try {
       const response = await projectApi.getFavoriteProjects({
         page: 1,
@@ -176,6 +177,8 @@ export const useGalleryStore = defineStore('gallery', () => {
       return response.data
     } catch (error) {
       console.error('获取收藏项目失败:', error)
+      projects.value = []
+      total.value = 0
       throw error
     } finally {
       loading.value = false

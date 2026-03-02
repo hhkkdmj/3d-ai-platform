@@ -153,9 +153,18 @@ const loadProjects = async () => {
         page_size: pageSize.value
       })
     }
-  } catch (error) {
+  } catch (error: any) {
     console.error('加载项目列表失败:', error)
-    ElMessage.error('加载项目列表失败')
+    if (error.response?.status === 401) {
+      ElMessage.error('请先登录')
+      router.push('/login')
+    } else if (error.response?.status === 403) {
+      ElMessage.error('没有权限访问')
+    } else if (error.response?.status === 404) {
+      ElMessage.error('资源不存在')
+    } else {
+      ElMessage.error(error.response?.data?.detail || '加载项目列表失败')
+    }
   }
 }
 
@@ -171,6 +180,8 @@ const handleViewAuthor = (userId: number) => {
 const handleTabChange = (tab: any) => {
   activeTab.value = tab.props.name
   currentPage.value = 1
+  searchQuery.value = ''
+  searchType.value = 'project'
   loadProjects()
 }
 
