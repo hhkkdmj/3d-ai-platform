@@ -19,7 +19,7 @@
       <div v-if="project" class="project-info">
         <div class="project-header">
           <div class="project-meta">
-            <span class="project-author">作者: {{ project.username || project.user_id }}</span>
+            <span class="project-author">作者: <span class="author-name" @click="handleViewAuthor">{{ project.username || project.user_id }}</span></span>
             <span class="project-date">{{ formatDate(project.created_at) }}</span>
           </div>
           <div class="project-actions">
@@ -187,6 +187,12 @@ const goHome = () => {
   router.push('/')
 }
 
+const handleViewAuthor = () => {
+  if (project.value) {
+    router.push({ name: 'gallery-user-detail', params: { id: project.value.user_id } })
+  }
+}
+
 const handleLike = async () => {
   if (!isLoggedIn.value) {
     ElMessage.warning('请先登录')
@@ -331,6 +337,14 @@ onMounted(() => {
 
       .project-author {
         font-weight: 500;
+
+        .author-name {
+          color: #409eff;
+          cursor: pointer;
+          &:hover {
+            text-decoration: underline;
+          }
+        }
       }
     }
 

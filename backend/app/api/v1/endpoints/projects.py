@@ -282,7 +282,8 @@ async def duplicate_project(
 
 @router.get("/public/list", response_model=ProjectListResponse)
 async def list_public_projects(
-    search: Optional[str] = Query(None, description="按名称搜索"),
+    search_type: Optional[str] = Query(None, description="搜索类型: project或user"),
+    search_value: Optional[str] = Query(None, description="搜索值"),
     sort_by: str = Query("created_at", description="排序字段"),
     sort_order: str = Query("desc", description="排序方向"),
     page: int = Query(1, ge=1, description="页码"),
@@ -292,9 +293,17 @@ async def list_public_projects(
     """获取公共项目列表"""
     query = db.query(Project).filter(Project.is_public == True, Project.status == "completed")
     
-    # 名称搜索
-    if search:
-        query = query.filter(Project.name.contains(search))
+    # 搜索
+    if search_value:
+        if search_type == "user":
+            # 按作者名称搜索
+            user_ids = db.query(User.id).filter(User.username.contains(search_value)).all()
+            user_ids = [user[0] for user in user_ids]
+            if user_ids:
+                query = query.filter(Project.user_id.in_(user_ids))
+        else:
+            # 按项目名称搜索
+            query = query.filter(Project.name.contains(search_value))
     
     # 排序
     if sort_order == "desc":

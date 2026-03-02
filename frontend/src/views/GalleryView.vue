@@ -10,17 +10,23 @@
 
     <!-- 工具栏 -->
     <div class="toolbar">
-      <el-input
-        v-model="searchQuery"
-        placeholder="搜索项目名称"
-        clearable
-        class="search-input"
-        @input="handleSearch"
-      >
-        <template #prefix>
-          <el-icon><Search /></el-icon>
-        </template>
-      </el-input>
+      <div class="search-container">
+        <el-select v-model="searchType" placeholder="搜索类型" class="search-type-select">
+          <el-option label="项目名称" value="project" />
+          <el-option label="作者名称" value="user" />
+        </el-select>
+        <el-input
+          v-model="searchQuery"
+          :placeholder="searchType === 'project' ? '搜索项目名称' : '搜索作者名称'"
+          clearable
+          class="search-input"
+          @input="handleSearch"
+        >
+          <template #prefix>
+            <el-icon><Search /></el-icon>
+          </template>
+        </el-input>
+      </div>
 
       <el-select v-model="sortBy" placeholder="排序方式" @change="handleSort">
         <el-option label="最新创建" value="created_at" />
@@ -62,6 +68,7 @@
           :project="project"
           :is-public="true"
           @view="handleViewProject"
+          @viewAuthor="handleViewAuthor"
         />
       </div>
 
@@ -94,6 +101,7 @@ const router = useRouter()
 const galleryStore = useGalleryStore()
 
 // 搜索和排序状态
+const searchType = ref<'project' | 'user'>('project')
 const searchQuery = ref('')
 const sortBy = ref('created_at')
 const sortOrder = ref<'asc' | 'desc'>('desc')
@@ -104,7 +112,8 @@ const pageSize = ref(12)
 const loadProjects = async () => {
   try {
     await galleryStore.fetchPublicProjects({
-      search: searchQuery.value || undefined,
+      search_type: searchQuery.value ? searchType.value : undefined,
+      search_value: searchQuery.value || undefined,
       sort_by: sortBy.value,
       sort_order: sortOrder.value,
       page: currentPage.value,
@@ -118,6 +127,10 @@ const loadProjects = async () => {
 // 事件处理
 const handleViewProject = (project: Project) => {
   router.push({ name: 'gallery-project-detail', params: { id: project.id } })
+}
+
+const handleViewAuthor = (userId: number) => {
+  router.push({ name: 'gallery-user-detail', params: { id: userId } })
 }
 
 const handleSearch = () => {
@@ -184,8 +197,18 @@ onMounted(() => {
   border-radius: 8px;
   box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
 
-  .search-input {
-    width: 300px;
+  .search-container {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+
+    .search-type-select {
+      width: 120px;
+    }
+
+    .search-input {
+      width: 300px;
+    }
   }
 }
 
